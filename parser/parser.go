@@ -28,11 +28,20 @@ func ParseMoviesFromRSSFeed(url string) ([]*movie.Movie, error) {
 			return nil, fmt.Errorf("error parsing time: %v", err)
 		}
 
+		var id string
+		if movieID, ok := item.Extensions["tmdb"]["movieId"]; ok && len(movieID) > 0 {
+			id = movieID[0].Value
+		} else if tvID, ok := item.Extensions["tmdb"]["tvId"]; ok && len(tvID) > 0 {
+			id = tvID[0].Value
+		} else {
+			id = ""
+		}
+
 		parsedMovie := &movie.Movie{
 			Title:       item.Extensions["letterboxd"]["filmTitle"][0].Value,
 			ImageUrl:    item.Image.URL,
 			Rating:      item.Extensions["letterboxd"]["memberRating"][0].Value,
-			MovieID:     item.Extensions["tmdb"]["movieId"][0].Value,
+			MovieID:     id,
 			Year:        item.Extensions["letterboxd"]["filmYear"][0].Value,
 			LatestWatch: parsedTime,
 		}
